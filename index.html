@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TEST</title>
+<meta name="description" content="شركة مجد الوطنية">
+<meta name="theme-color" content="#1F2937">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="TEST">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+html, body { margin: 0; height: 100%; overflow: hidden; background: #1F2937; }
+body { font-family: system-ui, "Segoe UI", Tahoma, Arial, sans-serif; color: #fff; -webkit-font-smoothing: antialiased; }
+#app { position: fixed; left: 0; right: 0; bottom: 0; top: env(safe-area-inset-top, 0px); width: 100%; height: calc(100% - env(safe-area-inset-top, 0px)); border: 0; background: #EDF1F5; }
+#splash { position: fixed; inset: 0; z-index: 2; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 24px;
+  text-align: center; background: linear-gradient(180deg, #3E4753 0%, #1F2937 72%); transition: opacity .4s ease, visibility .4s; }
+#splash.gone { opacity: 0; visibility: hidden; }
+#splash img { width: 92px; height: 92px; border-radius: 22px; box-shadow: 0 18px 40px -14px rgba(0, 0, 0, .55); }
+#splash h1 { margin: 6px 0 0; font-size: 19px; font-weight: 700; }
+.bar { width: 132px; height: 2px; border-radius: 2px; background: rgba(255, 255, 255, .14); overflow: hidden; }
+.bar i { display: block; width: 45%; height: 100%; background: linear-gradient(90deg, transparent, #C8A15A, #E6CC94, #C8A15A, transparent); animation: ride 1.4s ease-in-out infinite; }
+@keyframes ride { from { transform: translateX(230%); } to { transform: translateX(-130%); } }
+#msg { margin: 0; max-width: 330px; font-size: 14px; line-height: 1.75; color: #C9D6E4; }
+#acts { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+#acts button, #acts a { font: inherit; font-size: 14px; font-weight: 700; border-radius: 10px; padding: 10px 18px; cursor: pointer; text-decoration: none; }
+#acts button { border: 0; background: #fff; color: #1F2937; }
+#acts a { border: 1px solid rgba(255, 255, 255, .35); color: #fff; }
+#hint { margin: 0; max-width: 330px; font-size: 12px; line-height: 1.7; color: #8FA6BF; }
+[hidden] { display: none !important; }
+@media (prefers-reduced-motion: reduce) { .bar i { animation: none; width: 100%; } #splash { transition: none; } }
+</style>
+</head>
+<body>
+<iframe id="app" title="شركة مجد الوطنية" allow="clipboard-write; fullscreen"></iframe>
+<div id="splash" role="status">
+  <img src="icon-192.png" alt="">
+  <h1>شركة مجد الوطنية</h1>
+  <div class="bar" id="bar" aria-hidden="true"><i></i></div>
+  <p id="msg">جارٍ فتح البرنامج…</p>
+  <div id="acts" hidden><button type="button" id="retry">حاول مرة أخرى</button><a id="web" target="_blank" rel="noopener">افتح في المتصفح</a></div>
+  <p id="hint" hidden>لمدير البرنامج: تأكد أن رابط هذا التطبيق محفوظ في البرنامج (الإعدادات ← تطبيق البرنامج).</p>
+</div>
+<script>
+var APP_URL = "https://script.google.com/macros/s/AKfycbwcTXZYhNmvcUDqVyJdfVFeQgpeTuPm1iCPi1JkTuGc_NRtuljKegQ4ExY-PVG0pHmw/exec";
+(function () {
+  var frame = document.getElementById("app"), splash = document.getElementById("splash"), msg = document.getElementById("msg"),
+    acts = document.getElementById("acts"), hint = document.getElementById("hint"), bar = document.getElementById("bar"), ready = false, slow = 0;
+  document.getElementById("web").href = APP_URL;
+  function stop(text, help) { msg.textContent = text; acts.hidden = false; bar.hidden = true; hint.hidden = !help; }
+  function open() {
+    ready = false; clearTimeout(slow);
+    splash.classList.remove("gone"); acts.hidden = true; hint.hidden = true; bar.hidden = false;
+    if (navigator.onLine === false) { stop("لا يوجد اتصال بالإنترنت. تأكد من الشبكة ثم حاول مرة أخرى."); return; }
+    msg.textContent = "جارٍ فتح البرنامج…";
+    frame.src = APP_URL;
+    slow = setTimeout(function () { if (!ready) stop("البرنامج يتأخر في الفتح. حاول مرة أخرى، أو افتحه في المتصفح.", true); }, 20000);
+  }
+  window.addEventListener("message", function (e) {
+    if (e.data && e.data.app === "ready") { ready = true; clearTimeout(slow); splash.classList.add("gone"); }
+  });
+  window.addEventListener("online", function () { if (!ready) open(); });
+  document.getElementById("retry").addEventListener("click", open);
+  if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(function () {});
+  open();
+})();
+</script>
+</body>
+</html>
